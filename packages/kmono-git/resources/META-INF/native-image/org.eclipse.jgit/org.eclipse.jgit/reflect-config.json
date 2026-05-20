@@ -215,5 +215,19 @@
         ]
       }
     ]
+  },
+  {
+    "name": "org.eclipse.jgit.diff.DiffAlgorithm$SupportedAlgorithm",
+    "condition": {
+      "typeReachable": "org.eclipse.jgit.diff.DiffFormatter"
+    },
+    "methods": [
+      {
+        "name": "values",
+        "parameterTypes": [
+
+        ]
+      }
+    ]
   }
 ]
