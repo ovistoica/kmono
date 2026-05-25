@@ -1,6 +1,7 @@
 (ns k16.kmono.cli.commands.clojure
   (:require
    [babashka.process :as proc]
+   [clojure.edn :as edn]
    [clojure.java.io :as io]
    [clojure.string :as str]
    [k16.kmono.cli.common.context :as common.context]
@@ -10,7 +11,8 @@
    [k16.kmono.core.packages :as core.packages]
    [k16.kmono.cp :as kmono.cp]
    [k16.kmono.log :as log]
-   [k16.kmono.version :as kmono.version]))
+   [k16.kmono.version :as kmono.version]
+   [meta-merge.core :as metamerge]))
 
 (set! *warn-on-reflection* true)
 
@@ -43,7 +45,8 @@
                X "X")
 
         sdeps-aliases (core.deps/generate-sdeps-aliases root packages)
-        sdeps {:aliases sdeps-aliases}
+        sdeps (metamerge/meta-merge {:aliases sdeps-aliases}
+                                    (or (:sdeps props) {}))
 
         aliases (kmono.cp/collect-aliases config packages)
 
@@ -88,8 +91,15 @@
              :changed-since opts/changed-since-opt
              :filter opts/package-filter-opt
 
+             :sdeps {:desc "Extra deps to merge with kmono-generated sdeps (equivalent to clojure -Sdeps)"
+                     :alias :D
+                     :coerce :string
+                     :parse-fn (fn -parse-sdeps [value]
+                                 (some-> value edn/read-string))}
+
              :A {:desc "Aliases"
                  :parse-fn opts/parse-bool-or-aliases}
+
              :M {:desc "Main aliases"
                  :parse-fn opts/parse-bool-or-aliases}
              :T {:desc "Tool aliases"
